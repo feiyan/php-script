@@ -25,6 +25,7 @@ class Xss
      * @desc step two: 判断是否允许的html属性
      */
     public function xss_check($str){
+        $str = urldecode($str);
         $str_strip = strip_tags($str, '<'.implode('><', $this->_allow_html_tags).'>');
         if( $str_strip!=$str ){
             return false;
@@ -34,10 +35,10 @@ class Xss
             preg_match_all($pattern, $str_strip, $tags);
             if( isset($tags[0]) && !empty($tags[0]) ){
                 foreach( $tags[0] as $tag ){
-                    preg_match_all('/([a-z\-]*)\=\"[^"]*\"/', $tag, $attrs);
+                    preg_match_all('/\s+(\S*?)\s*\=/', $tag, $attrs);
                     if( isset($attrs[1]) && !empty($attrs[1]) ){
                         foreach( $attrs[1] as $attr ){
-                            if( !(in_array($attr, $this->_allow_attrs) || strstr($attr, 'data-')===0) ){
+                            if( !(in_array($attr, $this->_allow_attrs) || stripos($attr, 'data-')===0) ){
                                 return false;
                             }
                         }
@@ -46,5 +47,6 @@ class Xss
             }
         }
         return true;
+
     }
 }
